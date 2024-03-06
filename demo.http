@@ -5,7 +5,19 @@ Content-Type: application/json
 {
   "service": "com.switchvov.magicrpc.demo.api.UserService",
   "method": "findById",
-  "args": [100]
+  "args": [
+    100
+  ]
 }
 
-###
+### 获取订单信息
+POST http://localhost:8080/
+Content-Type: application/json
+
+{
+  "service": "com.switchvov.magicrpc.demo.api.OrderService",
+  "method": "findById",
+  "args": [
+    100
+  ]
+}
