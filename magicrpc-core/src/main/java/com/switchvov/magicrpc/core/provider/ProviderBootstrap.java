@@ -51,7 +51,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
     }
 
     @PostConstruct
-    public void buildProviders() {
+    private void buildProviders() {
         Map<String, Object> providers = applicationContext.getBeansWithAnnotation(MagicProvider.class);
         providers.forEach((x, y) -> LOGGER.info("server impl:" + x));
         providers.values().forEach(x -> {
