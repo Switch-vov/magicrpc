@@ -1,18 +1,23 @@
 package com.switchvov.magicrpc.demo.consumer;
 
+import com.switchvov.magicrpc.register.client.annotation.RegisterClient;
+import com.switchvov.magicrpc.register.client.annotation.RegisterConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
-public class MagicDemoConsumerApplication {
+@RegisterClient
+@Import({RegisterConfig.class})
+public class MagicrpcDemoConsumerApplication {
     @Autowired
     private ConsumerService consumerService;
 
     public static void main(String[] args) {
-        SpringApplication.run(MagicDemoConsumerApplication.class, args);
+        SpringApplication.run(MagicrpcDemoConsumerApplication.class, args);
     }
 
 

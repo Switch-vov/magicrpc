@@ -1,6 +1,6 @@
 ### 获取用户信息
 POST http://localhost:8080/
-Content-Type: application/json
+Content-Type: application/json;charset=UTF-8
 
 {
   "service": "com.switchvov.magicrpc.demo.api.UserService",
@@ -12,7 +12,7 @@ Content-Type: application/json
 
 ### 获取订单信息
 POST http://localhost:8080/
-Content-Type: application/json
+Content-Type: application/json;charset=UTF-8
 
 {
   "service": "com.switchvov.magicrpc.demo.api.OrderService",
@@ -21,3 +21,19 @@ Content-Type: application/json
     100
   ]
 }
+
+### 注册服务
+POST http://localhost:8082/api/service
+Content-Type: application/json
+
+{
+  "service_name": "com.switchvov.magicrpc.demo.api.UserService",
+  "address": "localhost",
+  "port": 8080
+}
+
+### 获取服务列表
+GET http://localhost:8082/api/service/com.switchvov.magicrpc.demo.api.UserService
+
+
+
