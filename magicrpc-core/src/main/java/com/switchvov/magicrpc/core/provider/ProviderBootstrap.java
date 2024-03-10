@@ -3,6 +3,7 @@ package com.switchvov.magicrpc.core.provider;
 import com.switchvov.magicrpc.core.annotation.MagicProvider;
 import com.switchvov.magicrpc.core.api.RpcRequest;
 import com.switchvov.magicrpc.core.api.RpcResponse;
+import com.switchvov.magicrpc.core.util.MethodUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     public RpcResponse<?> invokeRequest(RpcRequest request) {
         String methodName = request.getMethod();
-        if ("toString".equals(methodName) || "hashCode".equals(methodName)) {
+        if (MethodUtils.checkLocalMethod(methodName)) {
             return null;
         }
 

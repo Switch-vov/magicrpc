@@ -42,6 +42,7 @@ public class MagicrpcDemoConsumerApplication {
             LOGGER.info("user:get_id:{}", id);
             String name = userService.getName();
             LOGGER.info("user:get_name:{}", name);
+            LOGGER.info("user:toString:{}", userService.toString());
 //            Order order404 = orderService.findById(404);
 //            LOGGER.info("order:{}", order404);
         };

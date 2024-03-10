@@ -16,6 +16,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -51,7 +52,7 @@ public class MagicInvocationHandler implements InvocationHandler {
 
         RpcResponse response = post(request);
         if (Objects.isNull(response)) {
-            throw new RuntimeException("response is null");
+            return null;
         }
         if (response.isStatus()) {
             String rspJson = objectMapper.writeValueAsString(response.getData());
@@ -78,6 +79,9 @@ public class MagicInvocationHandler implements InvocationHandler {
             }
             String rspJson = body.string();
             LOGGER.debug("req:{}, rsp:{}", reqJson, rspJson);
+            if (!StringUtils.hasLength(rspJson)) {
+                return null;
+            }
             return objectMapper.readValue(rspJson, RpcResponse.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
