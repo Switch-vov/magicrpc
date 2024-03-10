@@ -28,17 +28,26 @@ public class ProviderBootstrap implements ApplicationContextAware {
     private final Map<String, Object> SKELETON = new HashMap<>();
 
     public RpcResponse<?> invokeRequest(RpcRequest request) {
+        String methodName = request.getMethod();
+        if ("toString".equals(methodName) || "hashCode".equals(methodName)) {
+            return null;
+        }
+
+        RpcResponse<Object> response = new RpcResponse<>();
         Object bean = SKELETON.get(request.getService());
         try {
             Method method = findMethod(bean.getClass(), request.getMethod());
             if (method != null) {
                 Object result = method.invoke(bean, request.getArgs());
-                return new RpcResponse<>(true, result);
+                response.setStatus(true);
+                response.setData(result);
             }
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            response.setEx(e.getMessage());
+        } catch (InvocationTargetException e) {
+            response.setEx(e.getTargetException().getMessage());
         }
-        return null;
+        return response;
     }
 
     private Method findMethod(Class<?> aClass, String methodName) {
@@ -53,7 +62,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
     @PostConstruct
     public void buildProviders() {
         Map<String, Object> providers = applicationContext.getBeansWithAnnotation(MagicProvider.class);
-        providers.forEach((x, y) -> LOGGER.info("server impl:" + x));
+        providers.forEach((x, y) -> LOGGER.debug("server impl:" + x));
         providers.values().forEach(x -> {
             Class<?> inter = x.getClass().getInterfaces()[0];
             SKELETON.put(inter.getCanonicalName(), x);

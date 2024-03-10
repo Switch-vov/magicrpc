@@ -20,4 +20,8 @@ public class RpcResponse<T> {
      * 数据
      */
     private T data;
+    /**
+     * 异常
+     */
+    private String ex;
 }
