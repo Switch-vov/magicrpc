@@ -1,6 +1,7 @@
 package com.switchvov.magicrpc.core.consumer;
 
 import com.switchvov.magicrpc.core.annotation.MagicConsumer;
+import com.switchvov.magicrpc.register.client.annotation.RegisterCli;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +25,11 @@ public class ConsumerBootstrap implements ApplicationContextAware {
     public static final Logger LOGGER = LoggerFactory.getLogger(ConsumerBootstrap.class);
 
     private ApplicationContext applicationContext;
+    private RegisterCli registerCli;
     private final Map<String, Object> STUB = new HashMap<>();
 
     public void start() {
+        registerCli = applicationContext.getBean(RegisterCli.class);
         String[] names = applicationContext.getBeanDefinitionNames();
         for (String name : names) {
             Object bean = applicationContext.getBean(name);
@@ -52,7 +55,7 @@ public class ConsumerBootstrap implements ApplicationContextAware {
         return Proxy.newProxyInstance(
                 service.getClassLoader(),
                 new Class[]{service},
-                new MagicInvocationHandler(service)
+                new MagicInvocationHandler(service, registerCli)
         );
     }
 

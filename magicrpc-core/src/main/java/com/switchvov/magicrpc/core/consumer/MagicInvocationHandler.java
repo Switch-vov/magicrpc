@@ -4,6 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.switchvov.magicrpc.core.api.RpcRequest;
 import com.switchvov.magicrpc.core.api.RpcResponse;
+import com.switchvov.magicrpc.core.loadbalance.LoadBalance;
+import com.switchvov.magicrpc.core.loadbalance.RandomLoadBalance;
+import com.switchvov.magicrpc.core.loadbalance.RoundRobinLoadBalance;
+import com.switchvov.magicrpc.register.client.annotation.RegisterCli;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,6 +25,9 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -35,6 +42,8 @@ public class MagicInvocationHandler implements InvocationHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(MagicInvocationHandler.class);
     public static final String JSON_TYPE = "application/json;charset=utf-8";
     private Class<?> service;
+    private RegisterCli registerCli;
+    private final Map<String, LoadBalance> serviceLoadBalance = new HashMap<>();
     private final OkHttpClient client = new OkHttpClient.Builder()
             .connectionPool(new ConnectionPool(16, 60, TimeUnit.SECONDS))
             .readTimeout(1, TimeUnit.SECONDS)
@@ -68,8 +77,13 @@ public class MagicInvocationHandler implements InvocationHandler {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+        List<String> hosts = registerCli.getHosts(request.getService());
+        serviceLoadBalance.putIfAbsent(request.getService(), new RandomLoadBalance(hosts));
+        LoadBalance loadBalance = serviceLoadBalance.getOrDefault(request.getService(), new RoundRobinLoadBalance(hosts));
+        String host = loadBalance.select();
+        LOGGER.info("service:{}, get hosts:{}, select host:{}", request.getService(), hosts, host);
         Request req = new Request.Builder()
-                .url("http://localhost:8080/")
+                .url("http://" + host)
                 .post(RequestBody.create(reqJson, MediaType.get(JSON_TYPE)))
                 .build();
         try (Response rsp = client.newCall(req).execute()) {
