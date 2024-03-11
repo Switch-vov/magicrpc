@@ -1,9 +1,12 @@
 package com.switchvov.magicrpc.demo.provider;
 
+import com.switchvov.magicrpc.core.annotation.MagicProvider;
 import com.switchvov.magicrpc.core.api.RpcRequest;
 import com.switchvov.magicrpc.core.api.RpcResponse;
 import com.switchvov.magicrpc.core.provider.ProviderBootstrap;
 import com.switchvov.magicrpc.core.provider.ProviderConfig;
+import com.switchvov.magicrpc.register.client.annotation.RegisterClient;
+import com.switchvov.magicrpc.register.client.annotation.RegisterConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
 @RestController
-@Import({ProviderConfig.class})
+@Import({ProviderConfig.class, RegisterConfig.class})
+@RegisterClient(registerAnnotationsOnClass = {MagicProvider.class})
 public class MagicrpcDemoProviderApplication {
     public static final Logger LOGGER = LoggerFactory.getLogger(MagicrpcDemoProviderApplication.class);
 

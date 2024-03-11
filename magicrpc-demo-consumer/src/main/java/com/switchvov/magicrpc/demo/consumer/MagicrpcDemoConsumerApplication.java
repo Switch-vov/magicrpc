@@ -6,6 +6,7 @@ import com.switchvov.magicrpc.demo.api.Order;
 import com.switchvov.magicrpc.demo.api.OrderService;
 import com.switchvov.magicrpc.demo.api.User;
 import com.switchvov.magicrpc.demo.api.UserService;
+import com.switchvov.magicrpc.register.client.annotation.RegisterConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationRunner;
@@ -19,7 +20,7 @@ import org.springframework.context.annotation.Import;
  * @since 2024/3/10
  */
 @SpringBootApplication
-@Import({ConsumerConfig.class})
+@Import({ConsumerConfig.class, RegisterConfig.class})
 public class MagicrpcDemoConsumerApplication {
     public static final Logger LOGGER = LoggerFactory.getLogger(MagicrpcDemoConsumerApplication.class);
     @MagicConsumer

@@ -30,6 +30,11 @@
             <artifactId>magicrpc-core</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.switchvov</groupId>
+            <artifactId>magicrpc-register-client</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
