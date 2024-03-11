@@ -1,0 +1,9 @@
+server:
+  port: 8082
+  address:
+spring:
+  profiles:
+    active: dev
+  cloud:
+    zookeeper:
+      enabled: true
