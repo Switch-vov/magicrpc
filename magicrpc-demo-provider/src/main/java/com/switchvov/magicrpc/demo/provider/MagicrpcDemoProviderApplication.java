@@ -49,7 +49,7 @@ public class MagicrpcDemoProviderApplication {
         return x -> {
             RpcRequest request = new RpcRequest();
             request.setService("com.switchvov.magicrpc.demo.api.UserService");
-            request.setMethod("findById");
+            request.setMethod("findById@int");
             request.setArgs(new Object[]{100});
 
             RpcResponse<?> response = providerBootstrap.invokeRequest(request);

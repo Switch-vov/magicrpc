@@ -36,14 +36,20 @@ public class MagicrpcDemoConsumerApplication {
     public ApplicationRunner consumerRunner() {
         return x -> {
             User user = userService.findById(1);
-            LOGGER.info("user:{}", user);
+            LOGGER.info("user:findById(int):{}", user);
             Order order = orderService.findById(2);
-            LOGGER.info("order:{}", order);
+            LOGGER.info("order:findById(int):{}", order);
             int id = userService.getId(3);
-            LOGGER.info("user:get_id:{}", id);
+            LOGGER.info("user:getId(int):{}", id);
             String name = userService.getName();
-            LOGGER.info("user:get_name:{}", name);
+            LOGGER.info("user:getName:{}", name);
             LOGGER.info("user:toString:{}", userService.toString());
+            user = userService.findById(4, "sss");
+            LOGGER.info("user:findById(int,String):{}", user);
+            id = userService.getId(5L);
+            LOGGER.info("user:getId(long):{}", id);
+            id = userService.getId(new User(6, "sss"));
+            LOGGER.info("user:getId(User):{}", id);
 //            Order order404 = orderService.findById(404);
 //            LOGGER.info("order:{}", order404);
         };

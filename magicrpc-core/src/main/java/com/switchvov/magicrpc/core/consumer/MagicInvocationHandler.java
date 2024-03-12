@@ -7,6 +7,7 @@ import com.switchvov.magicrpc.core.api.RpcResponse;
 import com.switchvov.magicrpc.core.loadbalance.LoadBalance;
 import com.switchvov.magicrpc.core.loadbalance.RandomLoadBalance;
 import com.switchvov.magicrpc.core.loadbalance.RoundRobinLoadBalance;
+import com.switchvov.magicrpc.core.util.MethodUtils;
 import com.switchvov.magicrpc.register.client.annotation.RegisterCli;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -56,7 +57,7 @@ public class MagicInvocationHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         RpcRequest request = new RpcRequest();
         request.setService(service.getCanonicalName());
-        request.setMethod(method.getName());
+        request.setMethod(MethodUtils.generateMethodSign(method));
         request.setArgs(args);
 
         RpcResponse response = post(request);
