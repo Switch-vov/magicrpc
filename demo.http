@@ -4,7 +4,7 @@ Content-Type: application/json
 
 {
   "service": "com.switchvov.magicrpc.demo.api.UserService",
-  "method": "findById",
+  "methodSign": "findById@1_int",
   "args": [
     100
   ]
@@ -16,7 +16,7 @@ Content-Type: application/json
 
 {
   "service": "com.switchvov.magicrpc.demo.api.OrderService",
-  "method": "findById",
+  "methodSign": "findById@1_java.lang.Integer",
   "args": [
     100
   ]

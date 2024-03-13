@@ -1,5 +1,8 @@
 package com.switchvov.magicrpc.core.util;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+
 /**
  * @author switch
  * @since 2024/3/10
@@ -16,5 +19,18 @@ public class MethodUtils {
             return true;
         }
         return false;
+    }
+
+    public static boolean checkLocalMethod(final Method method) {
+        return checkLocalMethod(method.getName());
+    }
+
+    public static String methodSign(Method method) {
+        StringBuilder sb = new StringBuilder(method.getName());
+        sb.append("@").append(method.getParameterCount());
+        Arrays.stream(method.getParameterTypes()).forEach(
+                c -> sb.append("_").append(c.getCanonicalName())
+        );
+        return sb.toString();
     }
 }

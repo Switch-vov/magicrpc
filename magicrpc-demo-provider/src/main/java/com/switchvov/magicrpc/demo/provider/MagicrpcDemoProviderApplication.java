@@ -37,7 +37,7 @@ public class MagicrpcDemoProviderApplication {
      */
     @RequestMapping("/")
     public RpcResponse<?> invoke(@RequestBody RpcRequest request) {
-        return providerBootstrap.invokeRequest(request);
+        return providerBootstrap.invoke(request);
     }
 
     @Bean
@@ -45,10 +45,10 @@ public class MagicrpcDemoProviderApplication {
         return x -> {
             RpcRequest request = new RpcRequest();
             request.setService("com.switchvov.magicrpc.demo.api.UserService");
-            request.setMethod("findById");
+            request.setMethodSign("findById@1_int");
             request.setArgs(new Object[]{100});
 
-            RpcResponse<?> response = providerBootstrap.invokeRequest(request);
+            RpcResponse<?> response = providerBootstrap.invoke(request);
             LOGGER.info("return:" + response.getData());
         };
     }

@@ -2,7 +2,6 @@ package com.switchvov.magicrpc.demo.consumer;
 
 import com.switchvov.magicrpc.core.annotation.MagicConsumer;
 import com.switchvov.magicrpc.core.consumer.ConsumerConfig;
-import com.switchvov.magicrpc.demo.api.Order;
 import com.switchvov.magicrpc.demo.api.OrderService;
 import com.switchvov.magicrpc.demo.api.User;
 import com.switchvov.magicrpc.demo.api.UserService;
@@ -34,15 +33,17 @@ public class MagicrpcDemoConsumerApplication {
     @Bean
     public ApplicationRunner consumerRunner() {
         return x -> {
-            User user = userService.findById(1);
-            LOGGER.info("user:{}", user);
-            Order order = orderService.findById(2);
-            LOGGER.info("order:{}", order);
-            int id = userService.getId(3);
-            LOGGER.info("user:get_id:{}", id);
-            String name = userService.getName();
-            LOGGER.info("user:get_name:{}", name);
-            LOGGER.info("user:toString:{}", userService.toString());
+            LOGGER.info("userService.getId(10) = {}", userService.getId(10));
+            LOGGER.info("userService.getId(10f) = {}", userService.getId(10f));
+            LOGGER.info("userService.getId(User) = {}", userService.getId(new User(100, "ss")));
+            LOGGER.info("userService.findById(1) = {}", userService.findById(1));
+            LOGGER.info("userService.findById(1, ss) = {}", userService.findById(1, "ss"));
+            LOGGER.info("orderService.findById(2) = {}", orderService.findById(2));
+            LOGGER.info("userService.getName() = {}", userService.getName());
+            LOGGER.info("userService.toString() = {}", userService.toString());
+            LOGGER.info("userService.getLongIds() = {}", userService.getLongIds());
+            LOGGER.info("userService.getIds()", userService.getIds());
+            LOGGER.info("userService.getIds(new int[]{4, 5, 6}) = {}", userService.getIds(new int[]{4, 5, 6}));
 //            Order order404 = orderService.findById(404);
 //            LOGGER.info("order:{}", order404);
         };
