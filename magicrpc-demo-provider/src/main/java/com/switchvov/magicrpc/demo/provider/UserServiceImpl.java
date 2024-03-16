@@ -5,6 +5,9 @@ import com.switchvov.magicrpc.demo.api.User;
 import com.switchvov.magicrpc.demo.api.UserService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author switch
  * @since 2024/3/6
@@ -61,4 +64,20 @@ public class UserServiceImpl implements UserService {
     public int[] getIds(int[] ids) {
         return ids;
     }
+
+    @Override
+    public List<User> getList(List<User> users) {
+        return users;
+    }
+
+    @Override
+    public Map<String, User> getMap(Map<String, User> userMap) {
+        return userMap;
+    }
+
+    @Override
+    public Boolean getFlag(boolean flag) {
+        return !flag;
+    }
+
 }

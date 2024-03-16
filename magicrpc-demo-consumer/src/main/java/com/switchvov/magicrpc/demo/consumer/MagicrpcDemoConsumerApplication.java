@@ -13,6 +13,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author switch
  * @since 2024/3/10
@@ -44,6 +47,9 @@ public class MagicrpcDemoConsumerApplication {
             LOGGER.info("userService.getLongIds() = {}", userService.getLongIds());
             LOGGER.info("userService.getIds()", userService.getIds());
             LOGGER.info("userService.getIds(new int[]{4, 5, 6}) = {}", userService.getIds(new int[]{4, 5, 6}));
+            LOGGER.info("userService.getList(List) = {}", userService.getList(List.of(new User(1, "ss"), new User(2, "ss"))));
+            LOGGER.info("userService.getMap(Map) = {}", userService.getMap(Map.of("A200", new User(200, "ss200"))));
+            LOGGER.info("userService.getFlag(boolean) = {}", userService.getFlag(false));
 //            Order order404 = orderService.findById(404);
 //            LOGGER.info("order:{}", order404);
         };
