@@ -12,6 +12,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -22,12 +24,18 @@ import java.util.Map;
  */
 @SpringBootApplication
 @Import({ConsumerConfig.class})
+@RestController
 public class MagicrpcDemoConsumerApplication {
     public static final Logger LOGGER = LoggerFactory.getLogger(MagicrpcDemoConsumerApplication.class);
     @MagicConsumer
     private UserService userService;
     @MagicConsumer
     private OrderService orderService;
+
+    @RequestMapping("/")
+    public User findBy(int id) {
+        return userService.findById(id);
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(MagicrpcDemoConsumerApplication.class, args);

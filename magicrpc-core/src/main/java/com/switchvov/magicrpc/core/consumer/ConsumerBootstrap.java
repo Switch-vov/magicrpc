@@ -1,6 +1,10 @@
 package com.switchvov.magicrpc.core.consumer;
 
 import com.switchvov.magicrpc.core.annotation.MagicConsumer;
+import com.switchvov.magicrpc.core.api.LoadBalancer;
+import com.switchvov.magicrpc.core.api.RegistryCenter;
+import com.switchvov.magicrpc.core.api.Router;
+import com.switchvov.magicrpc.core.api.RpcContext;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +31,14 @@ public class ConsumerBootstrap implements ApplicationContextAware {
     private final Map<String, Object> STUB = new HashMap<>();
 
     public void start() {
+        Router<?> router = applicationContext.getBean(Router.class);
+        LoadBalancer<?> loadBalancer = applicationContext.getBean(LoadBalancer.class);
+        RegistryCenter registryCenter = applicationContext.getBean(RegistryCenter.class);
+
+        RpcContext context = new RpcContext();
+        context.setRouter(router);
+        context.setLoadBalancer(loadBalancer);
+
         String[] names = applicationContext.getBeanDefinitionNames();
         for (String name : names) {
             Object bean = applicationContext.getBean(name);
@@ -36,7 +48,7 @@ public class ConsumerBootstrap implements ApplicationContextAware {
                     Class<?> service = field.getType();
                     String serviceName = service.getCanonicalName();
                     if (!STUB.containsKey(serviceName)) {
-                        STUB.put(serviceName, createConsumer(service));
+                        STUB.put(serviceName, createFromRegistry(service, context, registryCenter));
                     }
                     field.setAccessible(true);
                     field.set(bean, STUB.get(serviceName));
@@ -48,11 +60,17 @@ public class ConsumerBootstrap implements ApplicationContextAware {
 
     }
 
-    private Object createConsumer(Class<?> service) {
+    private Object createFromRegistry(Class<?> service, RpcContext context, RegistryCenter registryCenter) {
+        String serviceName = service.getCanonicalName();
+        List<String> providers = registryCenter.fetchAll(serviceName);
+        return createConsumer(service, context, providers);
+    }
+
+    private Object createConsumer(Class<?> service, RpcContext context, List<String> providers) {
         return Proxy.newProxyInstance(
                 service.getClassLoader(),
                 new Class[]{service},
-                new MagicInvocationHandler(service)
+                new MagicInvocationHandler(service, context, providers)
         );
     }
 

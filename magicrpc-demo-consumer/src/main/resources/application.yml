@@ -1,6 +1,7 @@
 server:
   port: 8085
-
+magicrpc:
+  providers: http://localhost:8080,http://localhost:8079,http://localhost:8078
 logging:
   level:
     com.switchvov.magicrpc.*: debug

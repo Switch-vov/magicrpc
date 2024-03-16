@@ -1,9 +1,16 @@
 package com.switchvov.magicrpc.core.consumer;
 
+import com.switchvov.magicrpc.core.api.LoadBalancer;
+import com.switchvov.magicrpc.core.api.RegistryCenter;
+import com.switchvov.magicrpc.core.api.Router;
+import com.switchvov.magicrpc.core.cluster.RoundRobinLoadBalancer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+
+import java.util.List;
 
 /**
  * @author switch
@@ -11,6 +18,9 @@ import org.springframework.core.annotation.Order;
  */
 @Configuration
 public class ConsumerConfig {
+    @Value("${magicrpc.providers}")
+    private String servers;
+
     @Bean
     public ConsumerBootstrap consumerBootstrap() {
         return new ConsumerBootstrap();
@@ -22,5 +32,20 @@ public class ConsumerConfig {
         return x -> {
             consumerBootstrap.start();
         };
+    }
+
+    @Bean
+    public LoadBalancer loadBalancer() {
+        return new RoundRobinLoadBalancer();
+    }
+
+    @Bean
+    public Router router() {
+        return Router.DEFAULT;
+    }
+
+    @Bean(initMethod = "start", destroyMethod = "stop")
+    public RegistryCenter registryCenter() {
+        return new RegistryCenter.StaticRegistryCenter(List.of(servers.split(",")));
     }
 }

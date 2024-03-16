@@ -2,6 +2,7 @@ package com.switchvov.magicrpc.core.consumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.switchvov.magicrpc.core.api.RpcContext;
 import com.switchvov.magicrpc.core.api.RpcRequest;
 import com.switchvov.magicrpc.core.api.RpcResponse;
 import com.switchvov.magicrpc.core.util.MethodUtils;
@@ -22,6 +23,7 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -35,7 +37,6 @@ import java.util.concurrent.TimeUnit;
 public class MagicInvocationHandler implements InvocationHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(MagicInvocationHandler.class);
     public static final String JSON_TYPE = "application/json;charset=utf-8";
-    private Class<?> service;
     private final OkHttpClient client = new OkHttpClient.Builder()
             .connectionPool(new ConnectionPool(16, 60, TimeUnit.SECONDS))
             .readTimeout(1, TimeUnit.SECONDS)
@@ -44,6 +45,10 @@ public class MagicInvocationHandler implements InvocationHandler {
             .build();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private Class<?> service;
+    private RpcContext context;
+    private List<String> providers;
+
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         RpcRequest request = new RpcRequest();
@@ -51,7 +56,11 @@ public class MagicInvocationHandler implements InvocationHandler {
         request.setMethodSign(MethodUtils.methodSign(method));
         request.setArgs(args);
 
-        RpcResponse response = post(request);
+        List<String> urls = context.getRouter().route(providers);
+        String url = (String) context.getLoadBalancer().choose(urls);
+        LOGGER.debug("loadBalancer.choose(urls) ==> {}", url);
+        RpcResponse response = post(request, url);
+
         if (Objects.isNull(response)) {
             return null;
         }
@@ -62,7 +71,7 @@ public class MagicInvocationHandler implements InvocationHandler {
         throw new RuntimeException(response.getEx());
     }
 
-    private RpcResponse post(RpcRequest request) {
+    private RpcResponse post(RpcRequest request, String url) {
         String reqJson;
         try {
             reqJson = objectMapper.writeValueAsString(request);
@@ -70,7 +79,7 @@ public class MagicInvocationHandler implements InvocationHandler {
             throw new RuntimeException(e);
         }
         Request req = new Request.Builder()
-                .url("http://localhost:8080/")
+                .url(url)
                 .post(RequestBody.create(reqJson, MediaType.get(JSON_TYPE)))
                 .build();
         try (Response rsp = client.newCall(req).execute()) {
