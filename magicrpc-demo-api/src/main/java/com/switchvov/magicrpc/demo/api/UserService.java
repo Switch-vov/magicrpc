@@ -33,4 +33,6 @@ public interface UserService {
     Map<String, User> getMap(Map<String, User> userMap);
 
     Boolean getFlag(boolean flag);
+
+    User[] findUsers(User[] users);
 }

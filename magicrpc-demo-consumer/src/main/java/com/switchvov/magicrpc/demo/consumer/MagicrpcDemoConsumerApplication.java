@@ -56,8 +56,10 @@ public class MagicrpcDemoConsumerApplication {
             LOGGER.info("userService.getIds()", userService.getIds());
             LOGGER.info("userService.getIds(new int[]{4, 5, 6}) = {}", userService.getIds(new int[]{4, 5, 6}));
             LOGGER.info("userService.getList(List) = {}", userService.getList(List.of(new User(1, "ss"), new User(2, "ss"))));
-            LOGGER.info("userService.getMap(Map) = {}", userService.getMap(Map.of("A200", new User(200, "ss200"))));
+            LOGGER.info("userService.getMap(Map) = {}", userService.getMap(Map.of("A200", new User(200, "ss200"), "A300", new User(300, "ss300"))));
             LOGGER.info("userService.getFlag(boolean) = {}", userService.getFlag(false));
+            LOGGER.info("userService.findUsers(User[]) = {}", List.of(userService.findUsers(new User[]{new User(3, "ss"), new User(4, "ss")})));
+
 //            Order order404 = orderService.findById(404);
 //            LOGGER.info("order:{}", order404);
         };
