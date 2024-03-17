@@ -2,6 +2,7 @@ package com.switchvov.magicrpc.core.consumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.switchvov.magicrpc.core.api.RegistryNode;
 import com.switchvov.magicrpc.core.api.RpcContext;
 import com.switchvov.magicrpc.core.api.RpcRequest;
 import com.switchvov.magicrpc.core.api.RpcResponse;
@@ -47,7 +48,7 @@ public class MagicInvocationHandler implements InvocationHandler {
 
     private Class<?> service;
     private RpcContext context;
-    private List<String> providers;
+    private List<RegistryNode> providers;
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -56,10 +57,10 @@ public class MagicInvocationHandler implements InvocationHandler {
         request.setMethodSign(MethodUtils.methodSign(method));
         request.setArgs(args);
 
-        List<String> urls = context.getRouter().route(providers);
-        String url = (String) context.getLoadBalancer().choose(urls);
-        LOGGER.debug("loadBalancer.choose(urls) ==> {}", url);
-        RpcResponse response = post(request, url);
+        List<RegistryNode> nodes = context.getRouter().route(providers);
+        RegistryNode node = (RegistryNode) context.getLoadBalancer().choose(nodes);
+        LOGGER.debug("loadBalancer.choose(urls) ==> {}, weight ===> {}", node.getServerUrl(), node.getWeight());
+        RpcResponse<?> response = post(request, node.getServerUrl());
 
         if (Objects.isNull(response)) {
             return null;
@@ -71,7 +72,7 @@ public class MagicInvocationHandler implements InvocationHandler {
         throw new RuntimeException(response.getEx());
     }
 
-    private RpcResponse post(RpcRequest request, String url) {
+    private RpcResponse<?> post(RpcRequest request, String url) {
         String reqJson;
         try {
             reqJson = objectMapper.writeValueAsString(request);

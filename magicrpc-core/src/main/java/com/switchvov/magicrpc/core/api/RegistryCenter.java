@@ -23,7 +23,7 @@ public interface RegistryCenter {
      * @param service
      * @param instance
      */
-    void register(String service, String instance);
+    void register(String service, RegistryNode instance);
 
     /**
      * for provider
@@ -31,7 +31,7 @@ public interface RegistryCenter {
      * @param service
      * @param instance
      */
-    void unregister(String service, String instance);
+    void unregister(String service, RegistryNode instance);
 
     /**
      * for consumer
@@ -39,14 +39,14 @@ public interface RegistryCenter {
      * @param service
      * @return
      */
-    List<String> fetchAll(String service);
+    List<RegistryNode> fetchAll(String service);
 
     // void subscribe();
 
     class StaticRegistryCenter implements RegistryCenter {
-        private final List<String> providers;
+        private final List<RegistryNode> providers;
 
-        public StaticRegistryCenter(List<String> providers) {
+        public StaticRegistryCenter(List<RegistryNode> providers) {
             this.providers = providers;
         }
 
@@ -61,17 +61,17 @@ public interface RegistryCenter {
         }
 
         @Override
-        public void register(String service, String instance) {
+        public void register(String service, RegistryNode instance) {
 
         }
 
         @Override
-        public void unregister(String service, String instance) {
+        public void unregister(String service, RegistryNode instance) {
 
         }
 
         @Override
-        public List<String> fetchAll(String service) {
+        public List<RegistryNode> fetchAll(String service) {
             return providers;
         }
     }

@@ -1,6 +1,7 @@
 package com.switchvov.magicrpc.core.registry;
 
 import com.switchvov.magicrpc.core.api.RegistryCenter;
+import com.switchvov.magicrpc.core.api.RegistryNode;
 
 import java.util.List;
 
@@ -20,17 +21,17 @@ public class ZKRegistryCenter implements RegistryCenter {
     }
 
     @Override
-    public void register(String service, String instance) {
+    public void register(String service, RegistryNode instance) {
 
     }
 
     @Override
-    public void unregister(String service, String instance) {
+    public void unregister(String service, RegistryNode instance) {
 
     }
 
     @Override
-    public List<String> fetchAll(String service) {
+    public List<RegistryNode> fetchAll(String service) {
         return null;
     }
 }

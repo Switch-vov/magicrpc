@@ -3,6 +3,7 @@ package com.switchvov.magicrpc.core.consumer;
 import com.switchvov.magicrpc.core.annotation.MagicConsumer;
 import com.switchvov.magicrpc.core.api.LoadBalancer;
 import com.switchvov.magicrpc.core.api.RegistryCenter;
+import com.switchvov.magicrpc.core.api.RegistryNode;
 import com.switchvov.magicrpc.core.api.Router;
 import com.switchvov.magicrpc.core.api.RpcContext;
 import lombok.Data;
@@ -62,11 +63,11 @@ public class ConsumerBootstrap implements ApplicationContextAware {
 
     private Object createFromRegistry(Class<?> service, RpcContext context, RegistryCenter registryCenter) {
         String serviceName = service.getCanonicalName();
-        List<String> providers = registryCenter.fetchAll(serviceName);
+        List<RegistryNode> providers = registryCenter.fetchAll(serviceName);
         return createConsumer(service, context, providers);
     }
 
-    private Object createConsumer(Class<?> service, RpcContext context, List<String> providers) {
+    private Object createConsumer(Class<?> service, RpcContext context, List<RegistryNode> providers) {
         return Proxy.newProxyInstance(
                 service.getClassLoader(),
                 new Class[]{service},
