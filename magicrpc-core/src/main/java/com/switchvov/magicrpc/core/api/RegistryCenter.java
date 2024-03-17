@@ -1,5 +1,7 @@
 package com.switchvov.magicrpc.core.api;
 
+import com.switchvov.magicrpc.core.registry.ChangeListener;
+
 import java.util.List;
 
 /**
@@ -41,7 +43,7 @@ public interface RegistryCenter {
      */
     List<String> fetchAll(String service);
 
-    // void subscribe();
+     void subscribe(String service, ChangeListener listener);
 
     class StaticRegistryCenter implements RegistryCenter {
         private final List<String> providers;
@@ -73,6 +75,11 @@ public interface RegistryCenter {
         @Override
         public List<String> fetchAll(String service) {
             return providers;
+        }
+
+        @Override
+        public void subscribe(String service, ChangeListener listener) {
+
         }
     }
 }

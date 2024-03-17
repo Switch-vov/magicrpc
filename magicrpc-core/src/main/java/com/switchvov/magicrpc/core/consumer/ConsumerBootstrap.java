@@ -6,6 +6,7 @@ import com.switchvov.magicrpc.core.api.RegistryCenter;
 import com.switchvov.magicrpc.core.api.Router;
 import com.switchvov.magicrpc.core.api.RpcContext;
 import lombok.Data;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -62,8 +63,21 @@ public class ConsumerBootstrap implements ApplicationContextAware {
 
     private Object createFromRegistry(Class<?> service, RpcContext context, RegistryCenter registryCenter) {
         String serviceName = service.getCanonicalName();
-        List<String> providers = registryCenter.fetchAll(serviceName);
+        List<String> providers = new ArrayList<>(mapUrl(registryCenter.fetchAll(serviceName)));
+        LOGGER.debug(" ===> get service:{} from registry, provider: {}", serviceName, providers);
+
+        registryCenter.subscribe(serviceName, event -> {
+            providers.clear();
+            providers.addAll(mapUrl(event.getData()));
+            LOGGER.debug(" ===> get service:{} from registry, provider: {}", serviceName, providers);
+        });
+
         return createConsumer(service, context, providers);
+    }
+
+    @NotNull
+    private static List<String> mapUrl(List<String> nodes) {
+        return nodes.stream().map(x -> "http://" + x.replace("_", ":")).toList();
     }
 
     private Object createConsumer(Class<?> service, RpcContext context, List<String> providers) {

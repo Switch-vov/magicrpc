@@ -4,13 +4,13 @@ import com.switchvov.magicrpc.core.api.LoadBalancer;
 import com.switchvov.magicrpc.core.api.RegistryCenter;
 import com.switchvov.magicrpc.core.api.Router;
 import com.switchvov.magicrpc.core.cluster.RoundRobinLoadBalancer;
+import com.switchvov.magicrpc.core.registry.ZKRegistryCenter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
-import java.util.List;
 
 /**
  * @author switch
@@ -29,9 +29,7 @@ public class ConsumerConfig {
     @Bean
     @Order(Integer.MIN_VALUE)
     public ApplicationRunner consumerBootstrapRunner(ConsumerBootstrap consumerBootstrap) {
-        return x -> {
-            consumerBootstrap.start();
-        };
+        return x -> consumerBootstrap.start();
     }
 
     @Bean
@@ -46,6 +44,6 @@ public class ConsumerConfig {
 
     @Bean(initMethod = "start", destroyMethod = "stop")
     public RegistryCenter registryCenter() {
-        return new RegistryCenter.StaticRegistryCenter(List.of(servers.split(",")));
+        return new ZKRegistryCenter();
     }
 }

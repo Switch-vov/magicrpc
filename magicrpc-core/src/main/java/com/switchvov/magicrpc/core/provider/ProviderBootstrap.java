@@ -1,15 +1,19 @@
 package com.switchvov.magicrpc.core.provider;
 
 import com.switchvov.magicrpc.core.annotation.MagicProvider;
+import com.switchvov.magicrpc.core.api.RegistryCenter;
 import com.switchvov.magicrpc.core.api.RpcRequest;
 import com.switchvov.magicrpc.core.api.RpcResponse;
 import com.switchvov.magicrpc.core.meta.ProviderMeta;
 import com.switchvov.magicrpc.core.util.MethodUtils;
 import com.switchvov.magicrpc.core.util.TypeUtils;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.Data;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.LinkedMultiValueMap;
@@ -17,12 +21,15 @@ import org.springframework.util.MultiValueMap;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 /**
+ * 服务提供者启动类
+ *
  * @author switch
  * @since 2024/3/7
  */
@@ -33,12 +40,37 @@ public class ProviderBootstrap implements ApplicationContextAware {
     private ApplicationContext applicationContext;
 
     private final MultiValueMap<String, ProviderMeta> SKELETON = new LinkedMultiValueMap<>();
+    private String instance;
+    @Value("${server.port}")
+    private String port;
 
     @PostConstruct
-    public void start() {
+    public void init() {
         Map<String, Object> providers = applicationContext.getBeansWithAnnotation(MagicProvider.class);
         providers.forEach((x, y) -> LOGGER.debug("server impl:" + x));
         providers.values().forEach(this::getInterface);
+    }
+
+    @SneakyThrows
+    public void start() {
+        String ip = InetAddress.getLocalHost().getHostAddress();
+        instance = ip + "_" + port;
+        SKELETON.keySet().forEach(this::registerService);
+    }
+
+    @PreDestroy
+    public void stop() {
+        SKELETON.keySet().forEach(this::unregisterService);
+    }
+
+    private void registerService(String service) {
+        RegistryCenter rc = applicationContext.getBean(RegistryCenter.class);
+        rc.register(service, instance);
+    }
+
+    private void unregisterService(String service) {
+        RegistryCenter rc = applicationContext.getBean(RegistryCenter.class);
+        rc.unregister(service, instance);
     }
 
     private void getInterface(final Object obj) {
