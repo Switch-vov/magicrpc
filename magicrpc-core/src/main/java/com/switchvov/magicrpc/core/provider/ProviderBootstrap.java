@@ -40,6 +40,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
     private ApplicationContext applicationContext;
 
     private final MultiValueMap<String, ProviderMeta> SKELETON = new LinkedMultiValueMap<>();
+    private RegistryCenter rc;
     private String instance;
     @Value("${server.port}")
     private String port;
@@ -49,6 +50,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
         Map<String, Object> providers = applicationContext.getBeansWithAnnotation(MagicProvider.class);
         providers.forEach((x, y) -> LOGGER.debug("server impl:" + x));
         providers.values().forEach(this::getInterface);
+        rc = applicationContext.getBean(RegistryCenter.class);
     }
 
     @SneakyThrows
@@ -64,12 +66,10 @@ public class ProviderBootstrap implements ApplicationContextAware {
     }
 
     private void registerService(String service) {
-        RegistryCenter rc = applicationContext.getBean(RegistryCenter.class);
         rc.register(service, instance);
     }
 
     private void unregisterService(String service) {
-        RegistryCenter rc = applicationContext.getBean(RegistryCenter.class);
         rc.unregister(service, instance);
     }
 
