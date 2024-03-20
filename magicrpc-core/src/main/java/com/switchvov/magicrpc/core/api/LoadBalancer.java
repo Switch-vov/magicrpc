@@ -8,6 +8,10 @@ import java.util.Objects;
  * @since 2024/3/16
  */
 public interface LoadBalancer<T> {
+    /**
+     * @param providers
+     * @return
+     */
     T choose(List<T> providers);
 
     LoadBalancer<?> DEFAULT = p -> (Objects.isNull(p) || p.isEmpty()) ? null : p.get(0);

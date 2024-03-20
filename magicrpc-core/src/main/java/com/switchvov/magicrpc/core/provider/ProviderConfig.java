@@ -1,7 +1,8 @@
 package com.switchvov.magicrpc.core.provider;
 
 import com.switchvov.magicrpc.core.api.RegistryCenter;
-import com.switchvov.magicrpc.core.registry.ZKRegistryCenter;
+import com.switchvov.magicrpc.core.registry.zookeeper.ZKRegistryCenter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,11 +19,16 @@ public class ProviderConfig {
     }
 
     @Bean
-    public ApplicationRunner providerBootstrapRunner(ProviderBootstrap providerBootstrap) {
+    public ApplicationRunner providerBootstrapRunner(@Autowired ProviderBootstrap providerBootstrap) {
         return x -> providerBootstrap.start();
     }
 
-    @Bean(initMethod = "start", destroyMethod = "stop")
+    @Bean
+    public ProviderInvoker providerInvoker(@Autowired ProviderBootstrap providerBootstrap) {
+        return new ProviderInvoker(providerBootstrap);
+    }
+
+    @Bean
     public RegistryCenter registryCenter() {
         return new ZKRegistryCenter();
     }

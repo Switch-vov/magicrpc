@@ -1,5 +1,7 @@
 package com.switchvov.magicrpc.core.api;
 
+import com.switchvov.magicrpc.core.meta.InstanceMeta;
+import com.switchvov.magicrpc.core.meta.ServiceMeta;
 import com.switchvov.magicrpc.core.registry.ChangeListener;
 
 import java.util.List;
@@ -22,33 +24,39 @@ public interface RegistryCenter {
     /**
      * for provider
      *
-     * @param service
-     * @param instance
+     * @param service  服务定义
+     * @param instance 实例定义
      */
-    void register(String service, String instance);
+    void register(ServiceMeta service, InstanceMeta instance);
 
     /**
      * for provider
      *
-     * @param service
-     * @param instance
+     * @param service  服务定义
+     * @param instance 实例定义
      */
-    void unregister(String service, String instance);
+    void unregister(ServiceMeta service, InstanceMeta instance);
 
     /**
      * for consumer
      *
-     * @param service
-     * @return
+     * @param service 服务定义
+     * @return 实例定义列表
      */
-    List<String> fetchAll(String service);
+    List<InstanceMeta> fetchAll(ServiceMeta service);
 
-     void subscribe(String service, ChangeListener listener);
+    /**
+     * 订阅
+     *
+     * @param service  服务定义
+     * @param listener 监听器
+     */
+    void subscribe(ServiceMeta service, ChangeListener listener);
 
     class StaticRegistryCenter implements RegistryCenter {
-        private final List<String> providers;
+        private final List<InstanceMeta> providers;
 
-        public StaticRegistryCenter(List<String> providers) {
+        public StaticRegistryCenter(List<InstanceMeta> providers) {
             this.providers = providers;
         }
 
@@ -63,22 +71,22 @@ public interface RegistryCenter {
         }
 
         @Override
-        public void register(String service, String instance) {
+        public void register(ServiceMeta service, InstanceMeta instance) {
 
         }
 
         @Override
-        public void unregister(String service, String instance) {
+        public void unregister(ServiceMeta service, InstanceMeta instance) {
 
         }
 
         @Override
-        public List<String> fetchAll(String service) {
+        public List<InstanceMeta> fetchAll(ServiceMeta service) {
             return providers;
         }
 
         @Override
-        public void subscribe(String service, ChangeListener listener) {
+        public void subscribe(ServiceMeta service, ChangeListener listener) {
 
         }
     }

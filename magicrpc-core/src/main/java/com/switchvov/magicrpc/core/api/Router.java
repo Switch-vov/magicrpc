@@ -1,5 +1,7 @@
 package com.switchvov.magicrpc.core.api;
 
+import com.switchvov.magicrpc.core.meta.InstanceMeta;
+
 import java.util.List;
 
 /**
@@ -7,7 +9,11 @@ import java.util.List;
  * @since 2024/3/16
  */
 public interface Router<T> {
+    /**
+     * @param providers
+     * @return
+     */
     List<T> route(List<T> providers);
 
-    Router<?> DEFAULT = p -> p;
+    Router<InstanceMeta> DEFAULT = p -> p;
 }

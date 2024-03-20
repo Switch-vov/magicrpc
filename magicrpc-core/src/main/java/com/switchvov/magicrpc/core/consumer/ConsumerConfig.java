@@ -4,8 +4,8 @@ import com.switchvov.magicrpc.core.api.LoadBalancer;
 import com.switchvov.magicrpc.core.api.RegistryCenter;
 import com.switchvov.magicrpc.core.api.Router;
 import com.switchvov.magicrpc.core.cluster.RoundRobinLoadBalancer;
-import com.switchvov.magicrpc.core.registry.ZKRegistryCenter;
-import org.springframework.beans.factory.annotation.Value;
+import com.switchvov.magicrpc.core.meta.InstanceMeta;
+import com.switchvov.magicrpc.core.registry.zookeeper.ZKRegistryCenter;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,9 +18,6 @@ import org.springframework.core.annotation.Order;
  */
 @Configuration
 public class ConsumerConfig {
-    @Value("${magicrpc.providers}")
-    private String servers;
-
     @Bean
     public ConsumerBootstrap consumerBootstrap() {
         return new ConsumerBootstrap();
@@ -33,12 +30,12 @@ public class ConsumerConfig {
     }
 
     @Bean
-    public LoadBalancer loadBalancer() {
-        return new RoundRobinLoadBalancer();
+    public LoadBalancer<InstanceMeta> loadBalancer() {
+        return new RoundRobinLoadBalancer<>();
     }
 
     @Bean
-    public Router router() {
+    public Router<InstanceMeta> router() {
         return Router.DEFAULT;
     }
 

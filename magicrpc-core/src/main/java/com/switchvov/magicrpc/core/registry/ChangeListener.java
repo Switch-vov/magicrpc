@@ -5,5 +5,9 @@ package com.switchvov.magicrpc.core.registry;
  * @since 2024/3/17
  */
 public interface ChangeListener {
+    /**
+     *
+     * @param event
+     */
     void fire(Event event);
 }

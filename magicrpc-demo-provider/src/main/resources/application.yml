@@ -3,3 +3,10 @@ server:
 logging:
   level:
     com.switchvov.magicrpc.*: debug
+magicrpc:
+  zk_server: localhost:2181
+  zk_root: magicrpc
+app:
+  id: app1
+  namespace: public
+  env: dev

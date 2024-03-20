@@ -2,11 +2,10 @@ package com.switchvov.magicrpc.core.provider;
 
 import com.switchvov.magicrpc.core.annotation.MagicProvider;
 import com.switchvov.magicrpc.core.api.RegistryCenter;
-import com.switchvov.magicrpc.core.api.RpcRequest;
-import com.switchvov.magicrpc.core.api.RpcResponse;
+import com.switchvov.magicrpc.core.meta.InstanceMeta;
 import com.switchvov.magicrpc.core.meta.ProviderMeta;
+import com.switchvov.magicrpc.core.meta.ServiceMeta;
 import com.switchvov.magicrpc.core.util.MethodUtils;
-import com.switchvov.magicrpc.core.util.TypeUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.Data;
@@ -19,13 +18,10 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 服务提供者启动类
@@ -37,13 +33,20 @@ import java.util.Objects;
 public class ProviderBootstrap implements ApplicationContextAware {
     public static final Logger LOGGER = LoggerFactory.getLogger(ProviderBootstrap.class);
 
-    private ApplicationContext applicationContext;
-
     private final MultiValueMap<String, ProviderMeta> SKELETON = new LinkedMultiValueMap<>();
+
+    private ApplicationContext applicationContext;
     private RegistryCenter rc;
-    private String instance;
+    private InstanceMeta instance;
+
     @Value("${server.port}")
     private String port;
+    @Value("${app.id}")
+    private String app;
+    @Value("${app.namespace}")
+    private String namespace;
+    @Value("${app.env}")
+    private String env;
 
     @PostConstruct
     public void init() {
@@ -56,21 +59,35 @@ public class ProviderBootstrap implements ApplicationContextAware {
     @SneakyThrows
     public void start() {
         String ip = InetAddress.getLocalHost().getHostAddress();
-        instance = ip + "_" + port;
+        instance = InstanceMeta.http(ip, Integer.valueOf(port));
+        rc.start();
         SKELETON.keySet().forEach(this::registerService);
     }
 
     @PreDestroy
     public void stop() {
         SKELETON.keySet().forEach(this::unregisterService);
+        rc.stop();
     }
 
     private void registerService(String service) {
-        rc.register(service, instance);
+        ServiceMeta serviceMeta = ServiceMeta.builder()
+                .name(service)
+                .app(app)
+                .namespace(namespace)
+                .env(env)
+                .build();
+        rc.register(serviceMeta, instance);
     }
 
     private void unregisterService(String service) {
-        rc.unregister(service, instance);
+        ServiceMeta serviceMeta = ServiceMeta.builder()
+                .name(service)
+                .app(app)
+                .namespace(namespace)
+                .env(env)
+                .build();
+        rc.unregister(serviceMeta, instance);
     }
 
     private void getInterface(final Object obj) {
@@ -86,50 +103,12 @@ public class ProviderBootstrap implements ApplicationContextAware {
     }
 
     private void createProvider(Class<?> inter, Method method, Object obj) {
-        ProviderMeta meta = new ProviderMeta();
-        meta.setMethod(method);
-        meta.setServiceImpl(obj);
-        meta.setMethodSign(MethodUtils.methodSign(method));
+        ProviderMeta meta = ProviderMeta.builder()
+                .method(method)
+                .serviceImpl(obj)
+                .methodSign(MethodUtils.methodSign(method))
+                .build();
         LOGGER.info("create a provider:{}", meta);
         SKELETON.add(inter.getCanonicalName(), meta);
-    }
-
-    public RpcResponse<?> invoke(RpcRequest request) {
-        RpcResponse<Object> response = new RpcResponse<>();
-        List<ProviderMeta> providerMetas = SKELETON.get(request.getService());
-        try {
-            ProviderMeta meta = findProviderMeta(providerMetas, request.getMethodSign());
-            if (Objects.isNull(meta)) {
-                return null;
-            }
-            Method method = meta.getMethod();
-            Object[] args = processArgs(request.getArgs(), method.getParameterTypes());
-            Object result = method.invoke(meta.getServiceImpl(), args);
-            response.setStatus(true);
-            response.setData(result);
-        } catch (IllegalAccessException e) {
-            response.setEx(e.getMessage());
-        } catch (InvocationTargetException e) {
-            response.setEx(e.getTargetException().getMessage());
-        }
-        return response;
-    }
-
-    private Object[] processArgs(Object[] args, Class<?>[] parameterTypes) {
-        if (Objects.isNull(args) || args.length == 0) {
-            return args;
-        }
-        Object[] actuals = new Object[args.length];
-        for (int i = 0; i < args.length; i++) {
-            actuals[i] = TypeUtils.cast(args[i], parameterTypes[i]);
-        }
-        return actuals;
-    }
-
-    private ProviderMeta findProviderMeta(List<ProviderMeta> providerMetas, String methodSign) {
-        return providerMetas.stream()
-                .filter(x -> x.getMethodSign().equals(methodSign))
-                .findFirst()
-                .orElse(null);
     }
 }

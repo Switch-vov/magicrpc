@@ -5,22 +5,26 @@ import com.switchvov.magicrpc.core.api.LoadBalancer;
 import com.switchvov.magicrpc.core.api.RegistryCenter;
 import com.switchvov.magicrpc.core.api.Router;
 import com.switchvov.magicrpc.core.api.RpcContext;
+import com.switchvov.magicrpc.core.meta.InstanceMeta;
+import com.switchvov.magicrpc.core.meta.ServiceMeta;
+import com.switchvov.magicrpc.core.util.MethodUtils;
 import lombok.Data;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
+ * 消费端启动类
+ *
  * @author switch
  * @since 2024/3/10
  */
@@ -28,31 +32,41 @@ import java.util.Map;
 public class ConsumerBootstrap implements ApplicationContextAware {
     public static final Logger LOGGER = LoggerFactory.getLogger(ConsumerBootstrap.class);
 
-    private ApplicationContext applicationContext;
     private final Map<String, Object> STUB = new HashMap<>();
 
+    private ApplicationContext applicationContext;
+
+    @Value("${server.port}")
+    private String port;
+    @Value("${app.id}")
+    private String app;
+    @Value("${app.namespace}")
+    private String namespace;
+    @Value("${app.env}")
+    private String env;
+
+
     public void start() {
-        Router<?> router = applicationContext.getBean(Router.class);
-        LoadBalancer<?> loadBalancer = applicationContext.getBean(LoadBalancer.class);
+        Router<InstanceMeta> router = applicationContext.getBean(Router.class);
+        LoadBalancer<InstanceMeta> loadBalancer = applicationContext.getBean(LoadBalancer.class);
         RegistryCenter registryCenter = applicationContext.getBean(RegistryCenter.class);
 
-        RpcContext context = new RpcContext();
-        context.setRouter(router);
-        context.setLoadBalancer(loadBalancer);
+        RpcContext context = RpcContext.builder()
+                .router(router)
+                .loadBalancer(loadBalancer)
+                .build();
 
         String[] names = applicationContext.getBeanDefinitionNames();
         for (String name : names) {
             Object bean = applicationContext.getBean(name);
-            List<Field> fields = findAnnotatedField(bean.getClass());
+            List<Field> fields = MethodUtils.findAnnotatedField(bean.getClass(), MagicConsumer.class);
             fields.forEach(field -> {
                 try {
                     Class<?> service = field.getType();
                     String serviceName = service.getCanonicalName();
-                    if (!STUB.containsKey(serviceName)) {
-                        STUB.put(serviceName, createFromRegistry(service, context, registryCenter));
-                    }
+                    Object consumer = STUB.computeIfAbsent(serviceName, s -> createFromRegistry(service, context, registryCenter));
                     field.setAccessible(true);
-                    field.set(bean, STUB.get(serviceName));
+                    field.set(bean, consumer);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -62,40 +76,30 @@ public class ConsumerBootstrap implements ApplicationContextAware {
     }
 
     private Object createFromRegistry(Class<?> service, RpcContext context, RegistryCenter registryCenter) {
-        String serviceName = service.getCanonicalName();
-        List<String> providers = new ArrayList<>(mapUrl(registryCenter.fetchAll(serviceName)));
-        LOGGER.debug(" ===> get service:{} from registry, provider: {}", serviceName, providers);
+        ServiceMeta serviceMeta = ServiceMeta.builder()
+                .name(service.getCanonicalName())
+                .app(app)
+                .namespace(namespace)
+                .env(env)
+                .build();
+        List<InstanceMeta> providers = new ArrayList<>(registryCenter.fetchAll(serviceMeta));
+        LOGGER.debug(" ===> get service:{} from registry, provider: {}", serviceMeta.toPath(), providers);
 
-        registryCenter.subscribe(serviceName, event -> {
+        registryCenter.subscribe(serviceMeta, event -> {
             providers.clear();
-            providers.addAll(mapUrl(event.getData()));
-            LOGGER.debug(" ===> get service:{} from registry, provider: {}", serviceName, providers);
+            providers.addAll(event.getData());
+            LOGGER.debug(" ===> get service:{} from registry, provider: {}", serviceMeta.toPath(), providers);
         });
 
         return createConsumer(service, context, providers);
     }
 
-    @NotNull
-    private static List<String> mapUrl(List<String> nodes) {
-        return nodes.stream().map(x -> "http://" + x.replace("_", ":")).toList();
-    }
 
-    private Object createConsumer(Class<?> service, RpcContext context, List<String> providers) {
+    private Object createConsumer(Class<?> service, RpcContext context, List<InstanceMeta> providers) {
         return Proxy.newProxyInstance(
                 service.getClassLoader(),
                 new Class[]{service},
                 new MagicInvocationHandler(service, context, providers)
         );
-    }
-
-    private List<Field> findAnnotatedField(Class<?> aClass) {
-        List<Field> fields = new ArrayList<>();
-        while (aClass != null) {
-            fields.addAll(Arrays.stream(aClass.getDeclaredFields())
-                    .filter(field -> field.isAnnotationPresent(MagicConsumer.class))
-                    .toList());
-            aClass = aClass.getSuperclass();
-        }
-        return fields;
     }
 }

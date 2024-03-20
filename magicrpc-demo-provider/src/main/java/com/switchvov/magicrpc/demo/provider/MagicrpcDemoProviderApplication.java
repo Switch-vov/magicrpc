@@ -2,8 +2,8 @@ package com.switchvov.magicrpc.demo.provider;
 
 import com.switchvov.magicrpc.core.api.RpcRequest;
 import com.switchvov.magicrpc.core.api.RpcResponse;
-import com.switchvov.magicrpc.core.provider.ProviderBootstrap;
 import com.switchvov.magicrpc.core.provider.ProviderConfig;
+import com.switchvov.magicrpc.core.provider.ProviderInvoker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +22,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class MagicrpcDemoProviderApplication {
     public static final Logger LOGGER = LoggerFactory.getLogger(MagicrpcDemoProviderApplication.class);
 
+    @Autowired
+    private ProviderInvoker providerInvoker;
+
     public static void main(String[] args) {
         SpringApplication.run(MagicrpcDemoProviderApplication.class, args);
     }
-
-    @Autowired
-    private ProviderBootstrap providerBootstrap;
 
     /**
      * 使用HTTP + JSON 来实现序列化和通信
@@ -37,18 +37,19 @@ public class MagicrpcDemoProviderApplication {
      */
     @RequestMapping("/")
     public RpcResponse<?> invoke(@RequestBody RpcRequest request) {
-        return providerBootstrap.invoke(request);
+        return providerInvoker.invoke(request);
     }
 
     @Bean
     public ApplicationRunner providerRun() {
         return x -> {
-            RpcRequest request = new RpcRequest();
-            request.setService("com.switchvov.magicrpc.demo.api.UserService");
-            request.setMethodSign("findById@1_int");
-            request.setArgs(new Object[]{100});
+            RpcRequest request = RpcRequest.builder()
+                    .service("com.switchvov.magicrpc.demo.api.UserService")
+                    .methodSign("findById@1_int")
+                    .args(new Object[]{100})
+                    .build();
 
-            RpcResponse<?> response = providerBootstrap.invoke(request);
+            RpcResponse<?> response = providerInvoker.invoke(request);
             LOGGER.info("return:" + response.getData());
         };
     }
