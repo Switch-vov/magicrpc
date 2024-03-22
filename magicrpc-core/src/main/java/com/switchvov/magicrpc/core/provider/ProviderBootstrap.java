@@ -18,10 +18,11 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.List;
 
 /**
  * 服务提供者启动类
@@ -50,9 +51,10 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     @PostConstruct
     public void init() {
-        Map<String, Object> providers = applicationContext.getBeansWithAnnotation(MagicProvider.class);
-        providers.forEach((x, y) -> LOGGER.debug("server impl:" + x));
-        providers.values().forEach(this::getInterface);
+        ProviderAnnotationHandler handler = applicationContext.getBean(ProviderAnnotationHandler.class);
+        List<Class<?>> providers = handler.handle(new Class[]{MagicProvider.class});
+        providers.forEach(provider -> LOGGER.debug("server class:" + provider));
+        providers.forEach(this::getInterface);
         rc = applicationContext.getBean(RegistryCenter.class);
     }
 
@@ -90,14 +92,33 @@ public class ProviderBootstrap implements ApplicationContextAware {
         rc.unregister(serviceMeta, instance);
     }
 
-    private void getInterface(final Object obj) {
-        Arrays.stream(obj.getClass().getInterfaces()).forEach(inter -> {
+    @SneakyThrows
+    private void getInterface(Class<?> clazz) {
+        Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+        int maxLength = 0;
+        for (Constructor<?> constructor : constructors) {
+            if (maxLength < constructor.getParameterCount()) {
+                maxLength = constructor.getParameterCount();
+            }
+
+        }
+        Object obj = null;
+        for (Constructor<?> constructor : constructors) {
+            if (maxLength == constructor.getParameterCount()) {
+                Object[] args = Arrays.stream(constructor.getParameterTypes())
+                        .map(paramClass -> applicationContext.getBean(paramClass))
+                        .toArray();
+                obj = constructor.newInstance(args);
+            }
+        }
+        final Object finalObj = obj;
+        Arrays.stream(clazz.getInterfaces()).forEach(inter -> {
             Method[] methods = inter.getMethods();
             for (Method method : methods) {
                 if (MethodUtils.checkLocalMethod(method)) {
                     continue;
                 }
-                createProvider(inter, method, obj);
+                createProvider(inter, method, finalObj);
             }
         });
     }
@@ -108,7 +129,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
                 .serviceImpl(obj)
                 .methodSign(MethodUtils.methodSign(method))
                 .build();
-        LOGGER.info("create a provider:{}", meta);
+        LOGGER.debug("create a provider:{}", meta);
         SKELETON.add(inter.getCanonicalName(), meta);
     }
 }

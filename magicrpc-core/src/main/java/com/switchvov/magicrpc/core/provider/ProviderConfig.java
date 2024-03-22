@@ -29,6 +29,11 @@ public class ProviderConfig {
     }
 
     @Bean
+    public ProviderAnnotationHandler providerAnnotationHandler() {
+        return new ProviderAnnotationHandler();
+    }
+
+    @Bean
     public RegistryCenter registryCenter() {
         return new ZKRegistryCenter();
     }

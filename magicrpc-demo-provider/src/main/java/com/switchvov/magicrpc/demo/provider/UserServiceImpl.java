@@ -3,9 +3,7 @@ package com.switchvov.magicrpc.demo.provider;
 import com.switchvov.magicrpc.core.annotation.MagicProvider;
 import com.switchvov.magicrpc.demo.api.User;
 import com.switchvov.magicrpc.demo.api.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
@@ -14,12 +12,14 @@ import java.util.Map;
  * @author switch
  * @since 2024/3/6
  */
-@Service
 @MagicProvider
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private Environment environment;
+    private final Environment environment;
+
+    public UserServiceImpl(Environment environment) {
+        this.environment = environment;
+    }
 
     @Override
     public User findById(int id) {
