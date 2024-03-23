@@ -22,5 +22,6 @@
         <module>magicrpc-demo-api</module>
         <module>magicrpc-demo-provider</module>
         <module>magicrpc-demo-consumer</module>
+        <module>magicrpc-transport</module>
     </modules>
 </project>

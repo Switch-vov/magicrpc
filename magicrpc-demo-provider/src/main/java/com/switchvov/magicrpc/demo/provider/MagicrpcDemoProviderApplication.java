@@ -12,12 +12,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
-@RestController
 @Import({ProviderConfig.class})
 public class MagicrpcDemoProviderApplication {
     public static final Logger LOGGER = LoggerFactory.getLogger(MagicrpcDemoProviderApplication.class);
@@ -27,17 +23,6 @@ public class MagicrpcDemoProviderApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(MagicrpcDemoProviderApplication.class, args);
-    }
-
-    /**
-     * 使用HTTP + JSON 来实现序列化和通信
-     *
-     * @param request
-     * @return
-     */
-    @RequestMapping("/")
-    public RpcResponse<?> invoke(@RequestBody RpcRequest request) {
-        return providerInvoker.invoke(request);
     }
 
     @Bean
