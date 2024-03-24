@@ -5,6 +5,8 @@ import com.switchvov.magicrpc.core.meta.InstanceMeta;
 import java.util.List;
 
 /**
+ * 路由器
+ *
  * @author switch
  * @since 2024/3/16
  */

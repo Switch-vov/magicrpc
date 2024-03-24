@@ -2,7 +2,7 @@ server:
   port: 8085
 logging:
   level:
-    com.switchvov.magicrpc.*: debug
+    com.switchvov.magicrpc: debug
 magicrpc:
   zk_server: localhost:2181
   zk_root: magicrpc

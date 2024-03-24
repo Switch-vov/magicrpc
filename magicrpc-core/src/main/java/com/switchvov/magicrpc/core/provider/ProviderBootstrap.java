@@ -10,8 +10,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.Data;
 import lombok.SneakyThrows;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -30,9 +29,8 @@ import java.util.Map;
  * @since 2024/3/7
  */
 @Data
+@Slf4j
 public class ProviderBootstrap implements ApplicationContextAware {
-    public static final Logger LOGGER = LoggerFactory.getLogger(ProviderBootstrap.class);
-
     private final MultiValueMap<String, ProviderMeta> SKELETON = new LinkedMultiValueMap<>();
 
     private ApplicationContext applicationContext;
@@ -51,7 +49,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
     @PostConstruct
     public void init() {
         Map<String, Object> providers = applicationContext.getBeansWithAnnotation(MagicProvider.class);
-        providers.forEach((x, y) -> LOGGER.debug("server impl:" + x));
+        providers.forEach((x, y) -> log.debug("server impl:" + x));
         providers.values().forEach(this::getInterface);
         rc = applicationContext.getBean(RegistryCenter.class);
     }
@@ -108,7 +106,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
                 .serviceImpl(obj)
                 .methodSign(MethodUtils.methodSign(method))
                 .build();
-        LOGGER.info("create a provider:{}", meta);
+        log.info("create a provider:{}", meta);
         SKELETON.add(inter.getCanonicalName(), meta);
     }
 }

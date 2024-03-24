@@ -4,6 +4,7 @@ import com.switchvov.magicrpc.core.api.RpcRequest;
 import com.switchvov.magicrpc.core.api.RpcResponse;
 import com.switchvov.magicrpc.core.provider.ProviderConfig;
 import com.switchvov.magicrpc.core.provider.ProviderInvoker;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootApplication
 @RestController
 @Import({ProviderConfig.class})
+@Slf4j
 public class MagicrpcDemoProviderApplication {
     public static final Logger LOGGER = LoggerFactory.getLogger(MagicrpcDemoProviderApplication.class);
 
@@ -50,7 +52,7 @@ public class MagicrpcDemoProviderApplication {
                     .build();
 
             RpcResponse<?> response = providerInvoker.invoke(request);
-            LOGGER.info("return:" + response.getData());
+            log.info("return:" + response.getData());
         };
     }
 }

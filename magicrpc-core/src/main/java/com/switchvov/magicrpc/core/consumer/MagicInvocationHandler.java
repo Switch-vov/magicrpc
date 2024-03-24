@@ -1,5 +1,6 @@
 package com.switchvov.magicrpc.core.consumer;
 
+import com.switchvov.magicrpc.core.api.Filter;
 import com.switchvov.magicrpc.core.api.RpcContext;
 import com.switchvov.magicrpc.core.api.RpcRequest;
 import com.switchvov.magicrpc.core.api.RpcResponse;
@@ -10,8 +11,7 @@ import com.switchvov.magicrpc.core.util.TypeUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -27,8 +27,8 @@ import java.util.Objects;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Slf4j
 public class MagicInvocationHandler implements InvocationHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MagicInvocationHandler.class);
 
     private final HttpInvoker invoker = new OkHttpInvoker();
 
@@ -44,9 +44,13 @@ public class MagicInvocationHandler implements InvocationHandler {
                 .args(args)
                 .build();
 
+        if (filter.preFilter(request)) {
+            return null;
+        }
+
         List<InstanceMeta> instanceMetas = context.getRouter().route(providers);
         InstanceMeta instanceMeta = context.getLoadBalancer().choose(instanceMetas);
-        LOGGER.debug("loadBalancer.choose(instanceMetas) ==> {}", instanceMeta.toString());
+        log.debug("loadBalancer.choose(instanceMetas) ==> {}", instanceMeta.toString());
         RpcResponse<?> response = invoker.post(request, instanceMeta.toUrl());
 
         if (Objects.isNull(response)) {

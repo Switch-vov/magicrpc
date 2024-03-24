@@ -6,14 +6,13 @@ import com.switchvov.magicrpc.core.meta.ServiceMeta;
 import com.switchvov.magicrpc.core.registry.ChangeListener;
 import com.switchvov.magicrpc.core.registry.Event;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
@@ -25,9 +24,8 @@ import java.util.concurrent.ConcurrentMap;
  * @author switch
  * @since 2024/3/16
  */
+@Slf4j
 public class ZKRegistryCenter implements RegistryCenter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ZKRegistryCenter.class);
-
     private final ConcurrentMap<ServiceMeta, TreeCache> CACHE_MAP = new ConcurrentHashMap<>();
     private CuratorFramework client = null;
 
@@ -45,12 +43,12 @@ public class ZKRegistryCenter implements RegistryCenter {
                 .retryPolicy(retryPolicy)
                 .build();
         client.start();
-        LOGGER.debug(" ===> zk client started to server[{}/{}].", zkServer, zkRoot);
+        log.debug(" ===> zk client started to server[{}/{}].", zkServer, zkRoot);
     }
 
     @Override
     public void stop() {
-        LOGGER.debug(" ===> zk client stopped.");
+        log.debug(" ===> zk client stopped.");
         for (TreeCache cache : CACHE_MAP.values()) {
             if (Objects.isNull(cache)) {
                 continue;
@@ -71,7 +69,7 @@ public class ZKRegistryCenter implements RegistryCenter {
             // 创建实例的临时性节点
             String instancePath = servicePath + "/" + instance.toPath();
             client.create().withMode(CreateMode.EPHEMERAL).forPath(instancePath, "provider".getBytes());
-            LOGGER.debug(" ===> register to zk: {}", instancePath);
+            log.debug(" ===> register to zk: {}", instancePath);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -88,7 +86,7 @@ public class ZKRegistryCenter implements RegistryCenter {
             // 删除实例节点
             String instancePath = servicePath + "/" + instance.toPath();
             client.delete().quietly().forPath(instancePath);
-            LOGGER.debug(" ===> unregister from zk: {}", instancePath);
+            log.debug(" ===> unregister from zk: {}", instancePath);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -100,7 +98,7 @@ public class ZKRegistryCenter implements RegistryCenter {
         try {
             // 获取所有子节点
             List<String> nodes = client.getChildren().forPath(servicePath);
-            LOGGER.debug(" ===> fetchAll from zk:{}", servicePath);
+            log.debug(" ===> fetchAll from zk:{}", servicePath);
             return nodes.stream().map(x -> {
                 String[] strs = x.split("_");
                 return InstanceMeta.http(strs[0], Integer.valueOf(strs[1]));
@@ -122,7 +120,7 @@ public class ZKRegistryCenter implements RegistryCenter {
 
         cache.getListenable().addListener((curator, event) -> {
             // 有任何节点变动这里会执行
-            LOGGER.debug(" ===> zk subscribe event: " + event);
+            log.debug(" ===> zk subscribe event: " + event);
             List<InstanceMeta> nodes = fetchAll(service);
             listener.fire(new Event(nodes));
         });

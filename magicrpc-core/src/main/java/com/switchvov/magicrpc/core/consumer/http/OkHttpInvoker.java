@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.switchvov.magicrpc.core.api.RpcRequest;
 import com.switchvov.magicrpc.core.api.RpcResponse;
 import com.switchvov.magicrpc.core.consumer.HttpInvoker;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.ConnectionPool;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -12,8 +13,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
@@ -24,8 +23,8 @@ import java.util.concurrent.TimeUnit;
  * @author switch
  * @since 2024/3/20
  */
+@Slf4j
 public class OkHttpInvoker implements HttpInvoker {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OkHttpInvoker.class);
     private static final String JSON_TYPE = "application/json;charset=utf-8";
 
     private final OkHttpClient client;
@@ -58,7 +57,7 @@ public class OkHttpInvoker implements HttpInvoker {
                 return null;
             }
             String rspJson = body.string();
-            LOGGER.debug("req:{}, rsp:{}", reqJson, rspJson);
+            log.debug("req:{}, rsp:{}", reqJson, rspJson);
             if (!StringUtils.hasLength(rspJson)) {
                 return null;
             }

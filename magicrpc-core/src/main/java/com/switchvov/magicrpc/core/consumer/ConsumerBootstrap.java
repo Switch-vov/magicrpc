@@ -9,8 +9,7 @@ import com.switchvov.magicrpc.core.meta.InstanceMeta;
 import com.switchvov.magicrpc.core.meta.ServiceMeta;
 import com.switchvov.magicrpc.core.util.MethodUtils;
 import lombok.Data;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -29,8 +28,8 @@ import java.util.Map;
  * @since 2024/3/10
  */
 @Data
+@Slf4j
 public class ConsumerBootstrap implements ApplicationContextAware {
-    public static final Logger LOGGER = LoggerFactory.getLogger(ConsumerBootstrap.class);
 
     private final Map<String, Object> STUB = new HashMap<>();
 
@@ -83,12 +82,12 @@ public class ConsumerBootstrap implements ApplicationContextAware {
                 .env(env)
                 .build();
         List<InstanceMeta> providers = new ArrayList<>(registryCenter.fetchAll(serviceMeta));
-        LOGGER.debug(" ===> get service:{} from registry, provider: {}", serviceMeta.toPath(), providers);
+        log.debug(" ===> get service:{} from registry, provider: {}", serviceMeta.toPath(), providers);
 
         registryCenter.subscribe(serviceMeta, event -> {
             providers.clear();
             providers.addAll(event.getData());
-            LOGGER.debug(" ===> get service:{} from registry, provider: {}", serviceMeta.toPath(), providers);
+            log.debug(" ===> get service:{} from registry, provider: {}", serviceMeta.toPath(), providers);
         });
 
         return createConsumer(service, context, providers);

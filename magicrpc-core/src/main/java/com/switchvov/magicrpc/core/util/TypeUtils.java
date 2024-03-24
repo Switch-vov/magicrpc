@@ -2,6 +2,9 @@ package com.switchvov.magicrpc.core.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -13,7 +16,9 @@ import java.util.Objects;
  * @author switch
  * @since 2024/3/13
  */
+@Slf4j
 public class TypeUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TypeUtils.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     public static Object cast(Object origin, Class<?> type) {
@@ -78,19 +83,20 @@ public class TypeUtils {
         }
     }
 
+    // TODO: 调成下面这种手动cast解决方案
 //    public static Object castMethodResultBasic(Method method, Object data) {
 //        Class<?> type = method.getReturnType();
-//        System.out.println("method.getReturnType() = " + type);
+//        log.debug("method.getReturnType() = {}", type);
 //        if (data instanceof JSONObject jsonResult) {
 //            if (Map.class.isAssignableFrom(type)) {
 //                Map resultMap = new HashMap();
 //                Type genericReturnType = method.getGenericReturnType();
-//                System.out.println(genericReturnType);
+//                log.debug("return type:{}", genericReturnType);
 //                if (genericReturnType instanceof ParameterizedType parameterizedType) {
-//                    Class<?> keyType = (Class<?>)parameterizedType.getActualTypeArguments()[0];
-//                    Class<?> valueType = (Class<?>)parameterizedType.getActualTypeArguments()[1];
-//                    System.out.println("keyType  : " + keyType);
-//                    System.out.println("valueType: " + valueType);
+//                    Class<?> keyType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+//                    Class<?> valueType = (Class<?>) parameterizedType.getActualTypeArguments()[1];
+//                    log.debug("keyType  : {}", keyType);
+//                    log.debug("valueType: {}", valueType);
 //                    jsonResult.entrySet().stream().forEach(
 //                            e -> {
 //                                Object key = cast(e.getKey(), keyType);
@@ -119,10 +125,10 @@ public class TypeUtils {
 //            } else if (List.class.isAssignableFrom(type)) {
 //                List<Object> resultList = new ArrayList<>(array.length);
 //                Type genericReturnType = method.getGenericReturnType();
-//                System.out.println(genericReturnType);
+//                log.debug("return type:{}", genericReturnType);
 //                if (genericReturnType instanceof ParameterizedType parameterizedType) {
 //                    Type actualType = parameterizedType.getActualTypeArguments()[0];
-//                    System.out.println(actualType);
+//                    log.debug("actual type:{}", actualType);
 //                    for (Object o : array) {
 //                        resultList.add(cast(o, (Class<?>) actualType));
 //                    }
