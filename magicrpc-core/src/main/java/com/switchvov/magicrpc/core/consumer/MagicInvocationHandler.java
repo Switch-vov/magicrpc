@@ -1,6 +1,5 @@
 package com.switchvov.magicrpc.core.consumer;
 
-import com.switchvov.magicrpc.core.api.Filter;
 import com.switchvov.magicrpc.core.api.RpcContext;
 import com.switchvov.magicrpc.core.api.RpcRequest;
 import com.switchvov.magicrpc.core.api.RpcResponse;
@@ -44,9 +43,9 @@ public class MagicInvocationHandler implements InvocationHandler {
                 .args(args)
                 .build();
 
-        if (filter.preFilter(request)) {
-            return null;
-        }
+//        if (filter.preFilter(request)) {
+//            return null;
+//        }
 
         List<InstanceMeta> instanceMetas = context.getRouter().route(providers);
         InstanceMeta instanceMeta = context.getLoadBalancer().choose(instanceMetas);
