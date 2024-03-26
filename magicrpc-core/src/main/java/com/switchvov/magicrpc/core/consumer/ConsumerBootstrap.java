@@ -1,10 +1,7 @@
 package com.switchvov.magicrpc.core.consumer;
 
 import com.switchvov.magicrpc.core.annotation.MagicConsumer;
-import com.switchvov.magicrpc.core.api.LoadBalancer;
-import com.switchvov.magicrpc.core.api.RegistryCenter;
-import com.switchvov.magicrpc.core.api.Router;
-import com.switchvov.magicrpc.core.api.RpcContext;
+import com.switchvov.magicrpc.core.api.*;
 import com.switchvov.magicrpc.core.meta.InstanceMeta;
 import com.switchvov.magicrpc.core.meta.ServiceMeta;
 import com.switchvov.magicrpc.core.util.MethodUtils;
@@ -49,10 +46,12 @@ public class ConsumerBootstrap implements ApplicationContextAware {
         Router<InstanceMeta> router = applicationContext.getBean(Router.class);
         LoadBalancer<InstanceMeta> loadBalancer = applicationContext.getBean(LoadBalancer.class);
         RegistryCenter registryCenter = applicationContext.getBean(RegistryCenter.class);
+        List<Filter> filters = applicationContext.getBeansOfType(Filter.class).values().stream().toList();
 
         RpcContext context = RpcContext.builder()
                 .router(router)
                 .loadBalancer(loadBalancer)
+                .filters(filters)
                 .build();
 
         String[] names = applicationContext.getBeanDefinitionNames();

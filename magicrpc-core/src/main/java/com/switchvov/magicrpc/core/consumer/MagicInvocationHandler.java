@@ -1,5 +1,6 @@
 package com.switchvov.magicrpc.core.consumer;
 
+import com.switchvov.magicrpc.core.api.Filter;
 import com.switchvov.magicrpc.core.api.RpcContext;
 import com.switchvov.magicrpc.core.api.RpcRequest;
 import com.switchvov.magicrpc.core.api.RpcResponse;
@@ -14,8 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 消费端动态代理
@@ -43,15 +46,27 @@ public class MagicInvocationHandler implements InvocationHandler {
                 .args(args)
                 .build();
 
-//        if (filter.preFilter(request)) {
-//            return null;
-//        }
+        for (Filter filter : Optional.ofNullable(this.context.getFilters()).orElse(new ArrayList<>())) {
+            RpcResponse preResponse = filter.preFilter(request);
+            if (!Objects.isNull(preResponse)) {
+                log.debug("{} ==> prefilter: {}", filter.getClass().getName(), preResponse);
+                return castReturnResult(method, preResponse);
+            }
+        }
 
         List<InstanceMeta> instanceMetas = context.getRouter().route(providers);
         InstanceMeta instanceMeta = context.getLoadBalancer().choose(instanceMetas);
         log.debug("loadBalancer.choose(instanceMetas) ==> {}", instanceMeta.toString());
         RpcResponse<?> response = invoker.post(request, instanceMeta.toUrl());
 
+        for (Filter filter : Optional.ofNullable(this.context.getFilters()).orElse(new ArrayList<>())) {
+            response = filter.postFilter(request, response);
+        }
+
+        return castReturnResult(method, response);
+    }
+
+    private static Object castReturnResult(Method method, RpcResponse<?> response) {
         if (Objects.isNull(response)) {
             return null;
         }

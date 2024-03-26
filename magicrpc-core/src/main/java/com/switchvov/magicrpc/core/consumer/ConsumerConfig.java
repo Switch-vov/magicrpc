@@ -1,9 +1,11 @@
 package com.switchvov.magicrpc.core.consumer;
 
+import com.switchvov.magicrpc.core.api.Filter;
 import com.switchvov.magicrpc.core.api.LoadBalancer;
 import com.switchvov.magicrpc.core.api.RegistryCenter;
 import com.switchvov.magicrpc.core.api.Router;
 import com.switchvov.magicrpc.core.cluster.RoundRobinLoadBalancer;
+import com.switchvov.magicrpc.core.filter.CacheFilter;
 import com.switchvov.magicrpc.core.meta.InstanceMeta;
 import com.switchvov.magicrpc.core.registry.zookeeper.ZKRegistryCenter;
 import org.springframework.boot.ApplicationRunner;
@@ -42,5 +44,10 @@ public class ConsumerConfig {
     @Bean(initMethod = "start", destroyMethod = "stop")
     public RegistryCenter registryCenter() {
         return new ZKRegistryCenter();
+    }
+
+    @Bean
+    public Filter filter() {
+        return new CacheFilter();
     }
 }

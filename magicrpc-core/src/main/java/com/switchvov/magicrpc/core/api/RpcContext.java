@@ -17,9 +17,6 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class RpcContext {
-    /**
-     * TODO
-     */
     private List<Filter> filters;
     private Router<InstanceMeta> router;
     private LoadBalancer<InstanceMeta> loadBalancer;
