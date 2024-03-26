@@ -8,21 +8,24 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author switch
+ * @since 2024/3/26
+ */
 public class CacheFilter implements Filter {
 
-    public static final Map<String, RpcResponse<?>> CACHE = new ConcurrentHashMap<>();
+    public static final Map<String, Object> CACHE = new ConcurrentHashMap<>();
 
     @Override
-    public RpcResponse preFilter(RpcRequest request) {
+    public Object preFilter(RpcRequest request) {
         return CACHE.get(request.toString());
     }
 
     @Override
-    public RpcResponse postFilter(RpcRequest request, RpcResponse response) {
-        if (Objects.isNull(response)) {
+    public Object postFilter(RpcRequest request, RpcResponse response, Object result) {
+        if (Objects.isNull(result)) {
             return null;
         }
-        CACHE.putIfAbsent(request.toString(), response);
-        return response;
+        return CACHE.putIfAbsent(request.toString(), result);
     }
 }

@@ -7,9 +7,9 @@ package com.switchvov.magicrpc.core.api;
  * @since 2024/3/16
  */
 public interface Filter {
-    RpcResponse preFilter(RpcRequest request);
+    Object preFilter(RpcRequest request);
 
-    RpcResponse postFilter(RpcRequest request, RpcResponse response);
+    Object postFilter(RpcRequest request, RpcResponse response, Object result);
 
     Filter DEFAULT = new Filter() {
         @Override
@@ -18,8 +18,8 @@ public interface Filter {
         }
 
         @Override
-        public RpcResponse postFilter(RpcRequest request, RpcResponse response) {
-            return response;
+        public Object postFilter(RpcRequest request, RpcResponse response, Object result) {
+            return null;
         }
     };
 }

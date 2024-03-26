@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -35,7 +35,7 @@ public class MagicrpcDemoConsumerApplication {
     private OrderService orderService;
 
     @RequestMapping("/")
-    public User findBy(int id) {
+    public User findBy(@RequestParam("id") int id) {
         return userService.findById(id);
     }
 
@@ -43,7 +43,7 @@ public class MagicrpcDemoConsumerApplication {
         SpringApplication.run(MagicrpcDemoConsumerApplication.class, args);
     }
 
-    @Bean
+//    @Bean
     public ApplicationRunner consumerRunner() {
         return x -> {
             log.info("userService.getId(10) = {}", userService.getId(10));

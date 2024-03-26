@@ -47,23 +47,27 @@ public class MagicInvocationHandler implements InvocationHandler {
                 .build();
 
         for (Filter filter : Optional.ofNullable(this.context.getFilters()).orElse(new ArrayList<>())) {
-            RpcResponse preResponse = filter.preFilter(request);
-            if (!Objects.isNull(preResponse)) {
-                log.debug("{} ==> prefilter: {}", filter.getClass().getName(), preResponse);
-                return castReturnResult(method, preResponse);
+            Object preResult = filter.preFilter(request);
+            if (!Objects.isNull(preResult)) {
+                log.debug("{} ==> prefilter: {}", filter.getClass().getName(), preResult);
+                return preResult;
             }
         }
 
         List<InstanceMeta> instanceMetas = context.getRouter().route(providers);
         InstanceMeta instanceMeta = context.getLoadBalancer().choose(instanceMetas);
         log.debug("loadBalancer.choose(instanceMetas) ==> {}", instanceMeta.toString());
+
         RpcResponse<?> response = invoker.post(request, instanceMeta.toUrl());
+        Object result = castReturnResult(method, response);
 
         for (Filter filter : Optional.ofNullable(this.context.getFilters()).orElse(new ArrayList<>())) {
-            response = filter.postFilter(request, response);
+            Object filterResult = filter.postFilter(request, response, result);
+            if (!Objects.isNull(filterResult)) {
+                return filterResult;
+            }
         }
-
-        return castReturnResult(method, response);
+        return result;
     }
 
     private static Object castReturnResult(Method method, RpcResponse<?> response) {
