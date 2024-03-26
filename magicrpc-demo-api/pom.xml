@@ -12,9 +12,6 @@
     <packaging>jar</packaging>
     <name>magicrpc-demo-api</name>
     <description>magicrpc-demo-api</description>
-    <properties>
-        <java.version>17</java.version>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
