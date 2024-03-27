@@ -7,7 +7,6 @@ import com.switchvov.magicrpc.core.provider.ProviderInvoker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -22,10 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class MagicrpcDemoProviderApplication {
     @Autowired
     private ProviderInvoker providerInvoker;
-
-    public static void main(String[] args) {
-        SpringApplication.run(MagicrpcDemoProviderApplication.class, args);
-    }
 
     /**
      * 使用HTTP + JSON 来实现序列化和通信

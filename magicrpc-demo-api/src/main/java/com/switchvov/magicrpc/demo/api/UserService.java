@@ -9,6 +9,7 @@ import java.util.Map;
  */
 public interface UserService {
     User findById(int id);
+    User findById(long id);
 
     User findById(int id, String name);
 
@@ -35,4 +36,5 @@ public interface UserService {
     Boolean getFlag(boolean flag);
 
     User[] findUsers(User[] users);
+    User ex(boolean flag);
 }

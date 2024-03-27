@@ -47,24 +47,28 @@ public class MagicrpcDemoConsumerApplication {
     @Bean
     public ApplicationRunner consumerRunner() {
         return x -> {
+            log.info("orderService.findById(2) = {}", orderService.findById(2));
+            log.info("userService.findById(1) = {}", userService.findById(1));
+            log.info("userService.findById(1, ss) = {}", userService.findById(1, "ss"));
+            log.info("userService.getName() = {}", userService.getName());
+            log.info("userService.toString() = {}", userService.toString());
             log.info("userService.getId(10) = {}", userService.getId(10));
             log.info("userService.getId(10f) = {}", userService.getId(10f));
             log.info("userService.getId(User) = {}", userService.getId(new User(100, "ss")));
-            log.info("userService.findById(1) = {}", userService.findById(1));
-            log.info("userService.findById(1, ss) = {}", userService.findById(1, "ss"));
-            log.info("orderService.findById(2) = {}", orderService.findById(2));
-            log.info("userService.getName() = {}", userService.getName());
-            log.info("userService.toString() = {}", userService.toString());
-            log.info("userService.getLongIds() = {}", userService.getLongIds());
             log.info("userService.getIds()", userService.getIds());
+            log.info("userService.getLongIds() = {}", userService.getLongIds());
             log.info("userService.getIds(new int[]{4, 5, 6}) = {}", userService.getIds(new int[]{4, 5, 6}));
             log.info("userService.getList(List) = {}", userService.getList(List.of(new User(1, "ss"), new User(2, "ss"))));
             log.info("userService.getMap(Map) = {}", userService.getMap(Map.of("A200", new User(200, "ss200"), "A300", new User(300, "ss300"))));
             log.info("userService.getFlag(boolean) = {}", userService.getFlag(false));
             log.info("userService.findUsers(User[]) = {}", List.of(userService.findUsers(new User[]{new User(3, "ss"), new User(4, "ss")})));
-
-//            Order order404 = orderService.findById(404);
-//            log.info("order:{}", order404);
+            log.info("userService.findById(long) = {}", userService.findById(10000L));
+            log.info("userService.ex(false) = {}", userService.ex(false));
+            try {
+                log.info("userService.ex(true) = {}", userService.ex(true));
+            } catch (RuntimeException e) {
+                log.info("userService.ex(true) exception = {}", e.getMessage());
+            }
         };
     }
 }
