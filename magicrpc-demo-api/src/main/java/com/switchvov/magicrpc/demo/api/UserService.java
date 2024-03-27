@@ -37,4 +37,6 @@ public interface UserService {
 
     User[] findUsers(User[] users);
     User ex(boolean flag);
+
+    public User find(int timeout);
 }

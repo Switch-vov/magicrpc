@@ -1,5 +1,6 @@
 package com.switchvov.magicrpc.core.provider;
 
+import com.switchvov.magicrpc.core.api.RpcException;
 import com.switchvov.magicrpc.core.api.RpcRequest;
 import com.switchvov.magicrpc.core.api.RpcResponse;
 import com.switchvov.magicrpc.core.meta.ProviderMeta;
@@ -36,9 +37,9 @@ public class ProviderInvoker {
             response.setStatus(true);
             response.setData(result);
         } catch (IllegalAccessException e) {
-            response.setEx(e.getMessage());
+            response.setEx(new RpcException(e.getMessage()));
         } catch (InvocationTargetException e) {
-            response.setEx(e.getTargetException().getMessage());
+            response.setEx(new RpcException(e.getTargetException().getMessage()));
         }
         return response;
     }

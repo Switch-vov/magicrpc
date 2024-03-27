@@ -23,4 +23,7 @@ Content-Type: application/json
 }
 
 ### 获取consumer用户信息
-GET http://127.0.0.1:8085/?id=101
+GET http://127.0.0.1:8085/api/?id=101
+
+### 模拟consumer超时重试
+GET http://127.0.0.1:8085/find/?timeout=3000

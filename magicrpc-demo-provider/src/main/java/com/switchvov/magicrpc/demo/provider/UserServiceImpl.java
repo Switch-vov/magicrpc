@@ -1,6 +1,7 @@
 package com.switchvov.magicrpc.demo.provider;
 
 import com.switchvov.magicrpc.core.annotation.MagicProvider;
+import com.switchvov.magicrpc.core.api.RpcException;
 import com.switchvov.magicrpc.demo.api.User;
 import com.switchvov.magicrpc.demo.api.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,9 +100,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public User ex(boolean flag) {
         if (flag) {
-            throw new RuntimeException("just throw an exception");
+            throw new RpcException("just throw an exception");
         }
         return new User(100, "magic-" + environment.getProperty("server.port") + "-" + System.currentTimeMillis());
+    }
+
+    @Override
+    public User find(int timeout) {
+        String port = environment.getProperty("server.port");
+        if ("8079".equals(port)) {
+            try {
+                Thread.sleep(timeout);
+            } catch (InterruptedException e) {
+                throw new RpcException(e);
+            }
+        }
+        return new User(1001, "magic-" + environment.getProperty("server.port") + "-" + System.currentTimeMillis());
     }
 
 }

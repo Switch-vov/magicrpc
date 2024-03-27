@@ -2,6 +2,7 @@ package com.switchvov.magicrpc.core.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.switchvov.magicrpc.core.api.RpcException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +80,7 @@ public class TypeUtils {
             String rspJson = OBJECT_MAPPER.writeValueAsString(data);
             return OBJECT_MAPPER.readValue(rspJson, method.getReturnType());
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
     }
 

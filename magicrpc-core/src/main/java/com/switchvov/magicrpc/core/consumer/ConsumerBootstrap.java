@@ -1,7 +1,12 @@
 package com.switchvov.magicrpc.core.consumer;
 
 import com.switchvov.magicrpc.core.annotation.MagicConsumer;
-import com.switchvov.magicrpc.core.api.*;
+import com.switchvov.magicrpc.core.api.Filter;
+import com.switchvov.magicrpc.core.api.LoadBalancer;
+import com.switchvov.magicrpc.core.api.RegistryCenter;
+import com.switchvov.magicrpc.core.api.Router;
+import com.switchvov.magicrpc.core.api.RpcContext;
+import com.switchvov.magicrpc.core.api.RpcException;
 import com.switchvov.magicrpc.core.meta.InstanceMeta;
 import com.switchvov.magicrpc.core.meta.ServiceMeta;
 import com.switchvov.magicrpc.core.util.MethodUtils;
@@ -40,6 +45,10 @@ public class ConsumerBootstrap implements ApplicationContextAware {
     private String namespace;
     @Value("${app.env}")
     private String env;
+    @Value("${app.retries}")
+    private int retries;
+    @Value("${app.timeout}")
+    private int timeout;
 
 
     public void start() {
@@ -52,7 +61,10 @@ public class ConsumerBootstrap implements ApplicationContextAware {
                 .router(router)
                 .loadBalancer(loadBalancer)
                 .filters(filters)
+                .parameters(new HashMap<>())
                 .build();
+        context.getParameters().put("app.retries", String.valueOf(retries));
+        context.getParameters().put("app.timeout", String.valueOf(timeout));
 
         String[] names = applicationContext.getBeanDefinitionNames();
         for (String name : names) {
@@ -66,7 +78,7 @@ public class ConsumerBootstrap implements ApplicationContextAware {
                     field.setAccessible(true);
                     field.set(bean, consumer);
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    throw new RpcException(e);
                 }
             });
         }

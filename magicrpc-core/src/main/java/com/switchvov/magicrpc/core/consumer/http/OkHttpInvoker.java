@@ -2,6 +2,7 @@ package com.switchvov.magicrpc.core.consumer.http;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.switchvov.magicrpc.core.api.RpcException;
 import com.switchvov.magicrpc.core.api.RpcRequest;
 import com.switchvov.magicrpc.core.api.RpcResponse;
 import com.switchvov.magicrpc.core.consumer.HttpInvoker;
@@ -15,7 +16,6 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -30,12 +30,12 @@ public class OkHttpInvoker implements HttpInvoker {
     private final OkHttpClient client;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public OkHttpInvoker() {
+    public OkHttpInvoker(int timeout) {
         client = new OkHttpClient.Builder()
                 .connectionPool(new ConnectionPool(16, 60, TimeUnit.SECONDS))
-                .readTimeout(1, TimeUnit.SECONDS)
-                .writeTimeout(1, TimeUnit.SECONDS)
-                .connectTimeout(1, TimeUnit.SECONDS)
+                .readTimeout(timeout, TimeUnit.MILLISECONDS)
+                .writeTimeout(timeout, TimeUnit.MILLISECONDS)
+                .connectTimeout(timeout, TimeUnit.MILLISECONDS)
                 .build();
     }
 
@@ -45,7 +45,7 @@ public class OkHttpInvoker implements HttpInvoker {
         try {
             reqJson = objectMapper.writeValueAsString(rpcRequest);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
         Request req = new Request.Builder()
                 .url(url)
@@ -62,8 +62,8 @@ public class OkHttpInvoker implements HttpInvoker {
                 return null;
             }
             return objectMapper.readValue(rspJson, RpcResponse.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RpcException(e);
         }
     }
 }

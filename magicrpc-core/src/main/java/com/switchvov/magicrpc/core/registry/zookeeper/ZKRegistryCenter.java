@@ -1,5 +1,6 @@
 package com.switchvov.magicrpc.core.registry.zookeeper;
 
+import com.switchvov.magicrpc.core.api.RpcException;
 import com.switchvov.magicrpc.core.api.RegistryCenter;
 import com.switchvov.magicrpc.core.meta.InstanceMeta;
 import com.switchvov.magicrpc.core.meta.ServiceMeta;
@@ -71,7 +72,7 @@ public class ZKRegistryCenter implements RegistryCenter {
             client.create().withMode(CreateMode.EPHEMERAL).forPath(instancePath, "provider".getBytes());
             log.debug(" ===> register to zk: {}", instancePath);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
     }
 
@@ -88,7 +89,7 @@ public class ZKRegistryCenter implements RegistryCenter {
             client.delete().quietly().forPath(instancePath);
             log.debug(" ===> unregister from zk: {}", instancePath);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
     }
 
@@ -104,7 +105,7 @@ public class ZKRegistryCenter implements RegistryCenter {
                 return InstanceMeta.http(strs[0], Integer.valueOf(strs[1]));
             }).toList();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
     }
 

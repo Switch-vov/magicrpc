@@ -35,9 +35,14 @@ public class MagicrpcDemoConsumerApplication {
     @MagicConsumer
     private OrderService orderService;
 
-    @RequestMapping("/")
+    @RequestMapping("/api/")
     public User findBy(@RequestParam("id") int id) {
         return userService.findById(id);
+    }
+
+    @RequestMapping("/find/")
+    public User find(@RequestParam("timeout") int timeout) {
+        return userService.find(timeout);
     }
 
     public static void main(String[] args) {

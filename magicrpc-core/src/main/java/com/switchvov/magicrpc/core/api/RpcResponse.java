@@ -25,5 +25,5 @@ public class RpcResponse<T> {
     /**
      * 异常
      */
-    private String ex;
+    private Exception ex;
 }
